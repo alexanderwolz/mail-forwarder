@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  mailserver:
+    container_name: mailserver
+    hostname: mailserver
+    build: ./build
+    restart: unless-stopped
+    environment:
+      DOMAIN: example.com
+      ALLOWED_NETWORKS: "127.0.0.1/32"
+      DOMAIN_TLS_PARENT: /etc/ssl
+      DOMAIN_TLS_CERT: cert.pem
+      DOMAIN_TLS_KEY: key.pem
+      ALIASES: |-
+        postmaster: john@doe.com
+        root: noreply
+        noreply: /dev/null
+      VIRTUAL_DOMAINS: otherdomain.com
+      VIRTUAL_ALIASES: |-
+        postmaster@otherdomain.com postmaster
+        noreply@otherdomain.com noreply
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./ssl:/etc/ssl:ro
