@@ -12,9 +12,8 @@ ENV DOMAIN_TLS_CERT "cert.pem"
 ENV DOMAIN_TLS_KEY "key.pem"
 
 RUN apk add --no-cache bash postfix postfix-pcre \
-    && adduser -S -u 1000 mailserver \
     && addgroup -S -g 1000 mailserver \
-    && adduser mailserver mailserver \
+    && adduser -S -u 1000 mailserver -G mailserver \
     && chown mailserver:mailserver /home/mailserver \
     && mkdir -p /etc/ssl
 
