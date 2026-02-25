@@ -1,4 +1,4 @@
-FROM alpine:3.23.2
+FROM alpine:3.23.3
 LABEL maintainer="mail@alexanderwolz.de"
 
 ENV DOMAIN="example.com"
