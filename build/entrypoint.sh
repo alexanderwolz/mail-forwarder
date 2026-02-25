@@ -14,7 +14,7 @@ postconf -e "mynetworks = $ALLOWED_NETWORKS" #allow only these networks
 postconf -e "mynetworks_style = host"
 postconf -e "smtpd_sender_restrictions = reject_unknown_sender_domain" #only allow valid sender domains (MX records)
 postconf -e "smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination" #only allow my destinations
-postconf -e "smtpd_helo_restrictions = reject_unknown_helo_hostname"
+postconf -e "smtpd_helo_restrictions = permit_mynetworks, reject_unknown_helo_hostname"
 postconf -e "smtpd_data_restrictions = reject_unauth_pipelining"
 
 #SSL
