@@ -1,4 +1,16 @@
 #!/bin/bash
+# Copyright (C) 2026 Alexander Wolz <mail@alexanderwolz.de>
+
+set -euo pipefail
+
+# Validate required fields
+: "${DOMAIN:?DOMAIN is required}"
+: "${ALIASES:?ALIASES is required}"
+: "${ALLOWED_NETWORKS:?ALLOWED_NETWORKS is required}"
+
+# Optional with fallbacks
+SMTP_HOSTNAME="${SMTP_HOSTNAME:-$DOMAIN}"
+SMTP_TLS_SECURITY_LEVEL="${SMTP_TLS_SECURITY_LEVEL:-encrypt}"
 
 postconf -e "inet_protocols = ipv4"
 postconf -e "maillog_file = /dev/stdout"
@@ -6,6 +18,7 @@ postconf -e "home_mailbox = maildir/"
 
 #Local domain config
 postconf -e "mydomain = $DOMAIN"
+postconf -e "myhostname = $SMTP_HOSTNAME"
 postconf -e "myorigin = \$mydomain"
 postconf -e "mydestination = \$myhostname, localhost.\$mydomain, \$mydomain"
 postconf -e "mynetworks = $ALLOWED_NETWORKS" #allow only these networks
@@ -18,7 +31,9 @@ postconf -e "smtpd_helo_restrictions = permit_mynetworks, reject_unknown_helo_ho
 postconf -e "smtpd_data_restrictions = reject_unauth_pipelining"
 
 #SSL
-postconf -e "smtpd_tls_security_level = may" #offers optional TLS
+postconf -e "smtp_tls_security_level = $SMTP_TLS_SECURITY_LEVEL" # TLS outbound
+postconf -e "smtpd_tls_security_level = may" # TLS inbound
+#According to RFC 2487 "smtpd_tls_security_level = encrypt" MUST NOT be applied in case of a publicly-referenced Postfix SMTP server
 postconf -e "smtp_tls_note_starttls_offer = yes"
 postconf -e "smtpd_tls_cert_file = $DOMAIN_TLS_PARENT/$DOMAIN_TLS_CERT"
 postconf -e "smtpd_tls_key_file = $DOMAIN_TLS_PARENT/$DOMAIN_TLS_KEY"
@@ -32,16 +47,15 @@ postconf -e "smtpd_tls_mandatory_ciphers = high"
 postconf -e "smtpd_tls_exclude_ciphers = ECDHE-RSA-RC4-SHA"
 postconf -e "smtpd_tls_mandatory_exclude_ciphers = ECDHE-RSA-RC4-SHA"
 
-#postconf -e "smtpd_tls_security_level = encrypt" #force TLS
-#According to RFC 2487 this (encrypt) MUST NOT be applied in case of a publicly-referenced Postfix SMTP server
-
 echo "$ALIASES" > /etc/postfix/aliases
 newaliases
 
 #virtual domain config
-postconf -e "virtual_alias_domains = $VIRTUAL_DOMAINS"
-postconf -e "virtual_alias_maps = lmdb:/etc/postfix/virtual"
-echo "$VIRTUAL_ALIASES" > /etc/postfix/virtual
-postmap /etc/postfix/virtual
+if [ -n "$VIRTUAL_DOMAINS" ]; then
+    postconf -e "virtual_alias_domains = $VIRTUAL_DOMAINS"
+    postconf -e "virtual_alias_maps = lmdb:/etc/postfix/virtual"
+    echo "$VIRTUAL_ALIASES" > /etc/postfix/virtual
+    postmap /etc/postfix/virtual
+fi
 
 postfix start-fg
