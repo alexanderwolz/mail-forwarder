@@ -11,6 +11,8 @@ set -euo pipefail
 # Optional with fallbacks
 SMTP_HOSTNAME="${SMTP_HOSTNAME:-$DOMAIN}"
 SMTP_TLS_SECURITY_LEVEL="${SMTP_TLS_SECURITY_LEVEL:-encrypt}"
+VIRTUAL_DOMAINS="${VIRTUAL_DOMAINS:-}"
+VIRTUAL_ALIASES="${VIRTUAL_ALIASES:-}"
 
 postconf -e "inet_protocols = ipv4"
 postconf -e "maillog_file = /dev/stdout"
