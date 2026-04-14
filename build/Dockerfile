@@ -1,13 +1,17 @@
 FROM alpine:3.23.3
 LABEL maintainer="mail@alexanderwolz.de"
 
-ENV DOMAIN="example.com"
-ENV ALIASES="root: /dev/null"
+# Required - no defaults (container will fail fast if missing)
+# DOMAIN                    -> e.g. "mail.example.com"
+# ALLOWED_NETWORKS          -> e.g. "localhost"
+# ALIASES                   -> e.g. "postmaster: john@doe.com"
 
-ENV VIRTUAL_DOMAINS="otherdomain.com"
-ENV VIRTUAL_ALIASES="root@otherdomain.com root"
+# Optional - with defaults
+# SMTP_HOSTNAME             -> e.g. "host.example.com", defaults to DOMAIN
+# SMTP_TLS_SECURITY_LEVEL   -> e.g "may" or "encrypt", defaults to "encrypt"
+# VIRTUAL_DOMAINS           -> e.g. "otherdomain.com", defaults to ""
+# VIRTUAL_ALIASES           -> e.g. "root@otherdomain.com root", defaults to ""
 
-ENV ALLOWED_NETWORKS="localhost"
 ENV DOMAIN_TLS_PARENT="/etc/ssl"
 ENV DOMAIN_TLS_CERT="cert.pem"
 ENV DOMAIN_TLS_KEY="key.pem"
